@@ -24,6 +24,7 @@ minetest.register_entity("halloween:disguise_overlay", {
         collisionbox = {0, 0, 0, 0, 0, 0},
         physical = false,
         pointable = false,
+                    is_visible = true,
         static_save = false,
     },
 
@@ -115,8 +116,8 @@ function halloween.set_disguise(player, disguise_id)
     -- Set visual properties
     obj:set_properties({
         mesh = disguise.mesh or "character.b3d",
-        textures = type(disguise.textures) == "table" and disguise.textures or {disguise.textures or "character.png"},        visual_size = disguise.visual_size or {x=1, y=1},
-    })
+        textures = type(disguise.textures) == "table" and disguise.textures or {disguise.textures or "character.png"},
+                visual_size = disguise.visual_size or {x=1, y=1},})
 
     -- Store entity data
     local ent = obj:get_luaentity()
