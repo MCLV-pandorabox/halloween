@@ -79,6 +79,7 @@ minetest.register_entity("halloween:disguise_overlay", {
 
 -- Set a player's disguise
 function halloween.set_disguise(player, disguise_id)
+        minetest.log("action", "[halloween] set_disguise called: player=" .. (player and player:get_player_name() or "nil") .. ", disguise_id=" .. tostring(disguise_id))
     if not player or not disguise_id then return false end
 
     if not halloween.is_enabled() then
@@ -90,6 +91,7 @@ function halloween.set_disguise(player, disguise_id)
         return false, "Disguise not found: " .. disguise_id
     end
 
+        minetest.log("action", "[halloween] Disguise data: mesh=" .. tostring(disguise and disguise.mesh or "nil") .. ", textures=" .. minetest.serialize(disguise and disguise.textures or "nil") .. ", visual_size=" .. minetest.serialize(disguise and disguise.visual_size or "nil"))
     if not disguise.enabled then
         return false, "Disguise is disabled by admin"
     end
@@ -118,6 +120,8 @@ function halloween.set_disguise(player, disguise_id)
         mesh = disguise.mesh or "character.b3d",
         textures = type(disguise.textures) == "table" and disguise.textures or {disguise.textures or "character.png"},
                 visual_size = disguise.visual_size or {x=1, y=1},})
+        
+    minetest.log("action", "[halloween] Overlay entity created and properties set")
 
     -- Store entity data
     local ent = obj:get_luaentity()
