@@ -144,8 +144,9 @@ function halloween.clear_disguise(player)
                 break
             end
         end
+                meta:set_string("halloween_disguise", "")
+            end
 
-    meta:set_string("halloween_disguise", "")
 end
 
 -- Clear all disguises (when disabling globally)
