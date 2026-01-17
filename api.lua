@@ -105,12 +105,17 @@ function halloween.set_disguise(player, disguise_id)
 
     -- Attach to player
     obj:set_attach(player, "", {x=0, y=0, z=0}, {x=0, y=0, z=0})
+    
+    -- Hide the player model (save original size first)
+    local props = player:get_properties()
+    local meta = player:get_meta()
+    meta:set_string("halloween_original_visual_size", minetest.serialize(props.visual_size))
+    player:set_properties({visual_size = {x=0, y=0}})
 
     -- Set visual properties
     obj:set_properties({
         mesh = disguise.mesh or "character.b3d",
-        textures = disguise.textures or {"character.png"},
-        visual_size = disguise.visual_size or {x=1, y=1},
+        textures = type(disguise.textures) == "table" and disguise.textures or {disguise.textures or "character.png"},        visual_size = disguise.visual_size or {x=1, y=1},
     })
 
     -- Store entity data
@@ -145,6 +150,16 @@ function halloween.clear_disguise(player)
             end
         end
                 meta:set_string("halloween_disguise", "")
+                
+        -- Restore player visibility
+        local saved_size = meta:get_string("halloween_original_visual_size")
+        if saved_size ~= "" then
+            local visual_size = minetest.deserialize(saved_size)
+            if visual_size then
+                player:set_properties({visual_size = visual_size})
+            end
+            meta:set_string("halloween_original_visual_size", "")
+        end
             end
 
 end
