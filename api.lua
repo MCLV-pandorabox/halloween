@@ -124,8 +124,7 @@ function halloween.set_disguise(player, disguise_id)
     -- Store in player meta
     local meta = player:get_meta()
     meta:set_string("halloween_disguise", disguise_id)
-    meta:set_string("halloween_overlay_id", tostring(obj:get_id()))
-
+    -- No need to store overlay ID - we'll find it by type when clearing
     return true
 end
 
@@ -134,25 +133,19 @@ function halloween.clear_disguise(player)
     if not player then return end
 
     local meta = player:get_meta()
-    local overlay_id = meta:get_string("halloween_overlay_id")
-
-    if overlay_id ~= "" then
-        local id = tonumber(overlay_id)
-        if id then
-            local pos = player:get_pos()
-            if pos then
-                for _, obj in ipairs(minetest.get_objects_inside_radius(pos, 3)) do
-                    if obj:get_id() == id then
-                        obj:remove()
-                        break
-                    end
-                end
+    -- Find and remove overlay entity by checking player name
+    local pos = player:get_pos()
+    if pos then
+        for _, obj in ipairs(minetest.get_objects_inside_radius(pos, 3)) do
+            local ent = obj:get_luaentity()
+            if ent and ent.name == "halloween:disguise_overlay" and 
+               ent._player_name == player:get_player_name() then
+                obj:remove()
+                break
             end
         end
-    end
 
     meta:set_string("halloween_disguise", "")
-    meta:set_string("halloween_overlay_id", "")
 end
 
 -- Clear all disguises (when disabling globally)
