@@ -2,19 +2,24 @@
 -- Auto-discovery of mobs and entities for disguises
 
 -- Build disguise list from Mobs Redo
-if minetest.global_exists("mobs") and mobs.registered_mobs then
-    for mob_name, mob_def in pairs(mobs.registered_mobs) do
-        halloween.register_disguise(mob_name, {
-            mesh = mob_def.mesh,
-            textures = mob_def.textures and mob_def.textures[1] or mob_def.textures,
-            visual_size = mob_def.visual_size,
-            animation = mob_def.animation,
-            category = "mob",
-            enabled = true,
-        })
+if minetest.global_exists("mobs") and mobs.spawning_mobs then
+    local count = 0
+    for mob_name, _ in pairs(mobs.spawning_mobs) do
+        -- Get the actual entity definition from core.registered_entities
+        local ent_def = minetest.registered_entities[mob_name]
+        if ent_def then
+            halloween.register_disguise(mob_name, {
+                mesh = ent_def.mesh,
+                textures = ent_def.textures and ent_def.textures[1] or ent_def.textures,
+                visual_size = ent_def.visual_size,
+                animation = ent_def.animation,
+                category = "mob",
+                enabled = true,
+            })
+            count = count + 1
+        end
     end
-    minetest.log("action", "[halloween] Registered " .. 
-        table.getn(mobs.registered_mobs) .. " mob disguises")
+    minetest.log("action", "[halloween] Registered " .. count .. " mob disguises")
 end
 
 -- Build disguise list from all registered entities
@@ -26,25 +31,21 @@ local entity_blacklist = {
 }
 
 local entity_count = 0
-for entity_name, entity_def in pairs(minetest.registered_entities) do
+for ent_name, ent_def in pairs(minetest.registered_entities) do
     -- Skip blacklisted and already-registered mobs
-    if not entity_blacklist[entity_name] and not halloween.disguises[entity_name] then
-        -- Only register if it has visual properties
-        if entity_def.mesh or entity_def.visual == "mesh" then
-            halloween.register_disguise(entity_name, {
-                mesh = entity_def.mesh or "character.b3d",
-                textures = entity_def.textures or {"character.png"},
-                visual_size = entity_def.visual_size or {x=1, y=1},
-                animation = entity_def.animation,
+    if not entity_blacklist[ent_name] and not halloween.disguises[ent_name] then
+        if ent_def.mesh and ent_def.textures then
+            halloween.register_disguise(ent_name, {
+                mesh = ent_def.mesh,
+                textures = ent_def.textures[1] or ent_def.textures,
+                visual_size = ent_def.visual_size,
+                animation = ent_def.animation,
                 category = "entity",
-                enabled = true,
+                enabled = false,  -- Disabled by default; admin must allow
             })
             entity_count = entity_count + 1
         end
     end
 end
 
-minetest.log("action", "[halloween] Registered " .. entity_count .. " entity disguises")
-
--- Load persisted enable/disable flags from storage
-halloween.load_disguise_flags()
+minetest.log("action", "[halloween] Registered " .. entity_count .. " additional entity disguises")
